@@ -1,10 +1,11 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import Burger from "../../components/Burger/Burger";
 import BuildControls from "../../components/Burger/BuildControls/BuildControls";
 import Modal from "../../components/UI/Modal/Modal";
 import OrderSummary from "../../components/Burger/OrderSummary/OrderSummary";
 import axios from "../../axios-orders";
 import Spinner from "../../components/UI/Spinner/Spinner";
+import withErrorHandler from "../withErrorHandler/withErrorHandler";
 
 const INGREDIENT_PRICES = {
   salad: 0.5,
@@ -15,17 +16,24 @@ const INGREDIENT_PRICES = {
 
 const BurgerBuilder = () => {
   const [state, setState] = useState({
-    ingredients: {
-      salad: 0,
-      bacon: 0,
-      cheese: 0,
-      meat: 0,
-    },
+    ingredients: null,
     totalPrice: 4,
     purchasable: false,
     purchasing: false,
     loading: false,
   });
+
+  useEffect(() => {
+    axios
+      .get("https://react-my-burger-6d0c7.firebaseio.com/ingredients.json")
+      .then((response) => {
+        setState((prevState) => {
+          return { ...prevState, ingredients: response.data };
+        });
+      }).catch(error => {});
+  },[]);
+  
+  
 
   const updatePurchaseState = (ingredients) => {
     const sum = Object.keys(ingredients)
@@ -125,7 +133,7 @@ const BurgerBuilder = () => {
       });
   };
 
-  const orderSummary = state.loading ? (
+  const orderSummary = (state.ingredients === null || state.loading) ? (
     <Spinner />
   ) : (
     <OrderSummary
@@ -136,22 +144,32 @@ const BurgerBuilder = () => {
     />
   );
 
+  const burger =
+    state.ingredients === null ? (
+      <Spinner />
+    ) : (
+      <Fragment>
+        <Burger ingredients={state.ingredients} />
+        <BuildControls
+          addIngredient={addIngredientHandle}
+          removeIngredient={removeIngredientHandle}
+          disabledInfo={disabledInfo}
+          purchasable={state.purchasable}
+          order={updatePurchasing}
+          price={state.totalPrice}
+        />
+      </Fragment>
+    );
+
+
   return (
     <Fragment>
       <Modal show={state.purchasing} cancelModal={removePurchasing}>
         {orderSummary}
       </Modal>
-      <Burger ingredients={state.ingredients} />
-      <BuildControls
-        addIngredient={addIngredientHandle}
-        removeIngredient={removeIngredientHandle}
-        disabledInfo={disabledInfo}
-        purchasable={state.purchasable}
-        order={updatePurchasing}
-        price={state.totalPrice}
-      />
+      {burger}
     </Fragment>
   );
 };
 
-export default BurgerBuilder;
+export default withErrorHandler(BurgerBuilder, axios);
