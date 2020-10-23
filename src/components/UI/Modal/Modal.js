@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import styles from "./Modal.module.css";
 import Backdrop from "../Backdrop/Backdrop";
 
-const Modal = React.memo((props) => {
+const Modal = (props) => {
 
   return (
     <Fragment>
@@ -18,5 +18,5 @@ const Modal = React.memo((props) => {
       </div>
     </Fragment>
   );
-});
+};
 export default Modal;

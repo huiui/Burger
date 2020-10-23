@@ -3,6 +3,8 @@ import Burger from "../../components/Burger/Burger";
 import BuildControls from "../../components/Burger/BuildControls/BuildControls";
 import Modal from "../../components/UI/Modal/Modal";
 import OrderSummary from "../../components/Burger/OrderSummary/OrderSummary";
+import axios from "../../axios-orders";
+import Spinner from "../../components/UI/Spinner/Spinner";
 
 const INGREDIENT_PRICES = {
   salad: 0.5,
@@ -22,6 +24,7 @@ const BurgerBuilder = () => {
     totalPrice: 4,
     purchasable: false,
     purchasing: false,
+    loading: false,
   });
 
   const updatePurchaseState = (ingredients) => {
@@ -90,13 +93,53 @@ const BurgerBuilder = () => {
   };
 
   const continueOrderHandle = () => {
-    alert("Continue!");
-  }
+    //alert("Continue!");
+    setState((prevState) => {
+      return { ...prevState, purchasing: true, loading: true };
+    });
+    const order = {
+      ingredients: state.ingredients,
+      price: state.totalPrice,
+      custormer: {
+        name: "Max Mad",
+        address: {
+          street: "Teststreet 1",
+          zipCode: "41351",
+          country: "Germany",
+        },
+        email: "test@test.com",
+      },
+      deliveryMethod: "fastest",
+    };
+    axios
+      .post("/orders.json", order)
+      .then((rsp) => {
+        setState((prevState) => {
+          return { ...prevState, purchasing: false, loading: false };
+        });
+      })
+      .catch((error) => {
+        setState((prevState) => {
+          return { ...prevState, purchasing: false, loading: false };
+        });
+      });
+  };
+
+  const orderSummary = state.loading ? (
+    <Spinner />
+  ) : (
+    <OrderSummary
+      ingredients={state.ingredients}
+      cancelOrder={removePurchasing}
+      continueOrder={continueOrderHandle}
+      price={state.totalPrice}
+    />
+  );
 
   return (
     <Fragment>
       <Modal show={state.purchasing} cancelModal={removePurchasing}>
-        <OrderSummary ingredients={state.ingredients} cancelOrder={removePurchasing} continueOrder={continueOrderHandle} price={state.totalPrice}/>
+        {orderSummary}
       </Modal>
       <Burger ingredients={state.ingredients} />
       <BuildControls
