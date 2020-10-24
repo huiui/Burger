@@ -14,7 +14,7 @@ const INGREDIENT_PRICES = {
   bacon: 0.7,
 };
 
-const BurgerBuilder = () => {
+const BurgerBuilder = (props) => {
   const [state, setState] = useState({
     ingredients: null,
     totalPrice: 4,
@@ -30,10 +30,9 @@ const BurgerBuilder = () => {
         setState((prevState) => {
           return { ...prevState, ingredients: response.data };
         });
-      }).catch(error => {});
-  },[]);
-  
-  
+      })
+      .catch((error) => {});
+  }, []);
 
   const updatePurchaseState = (ingredients) => {
     const sum = Object.keys(ingredients)
@@ -101,48 +100,57 @@ const BurgerBuilder = () => {
   };
 
   const continueOrderHandle = () => {
+    const queryParams = [];
+    for (let i in state.ingredients) {
+      queryParams.push(
+        encodeURIComponent(i) + "=" + encodeURIComponent(state.ingredients[i])
+      );
+    }
+    const queryString = queryParams.join("&");
+    props.history.push({ pathname: "./checkout", search: "?" + queryString });
     //alert("Continue!");
-    setState((prevState) => {
-      return { ...prevState, purchasing: true, loading: true };
-    });
-    const order = {
-      ingredients: state.ingredients,
-      price: state.totalPrice,
-      custormer: {
-        name: "Max Mad",
-        address: {
-          street: "Teststreet 1",
-          zipCode: "41351",
-          country: "Germany",
-        },
-        email: "test@test.com",
-      },
-      deliveryMethod: "fastest",
-    };
-    axios
-      .post("/orders.json", order)
-      .then((rsp) => {
-        setState((prevState) => {
-          return { ...prevState, purchasing: false, loading: false };
-        });
-      })
-      .catch((error) => {
-        setState((prevState) => {
-          return { ...prevState, purchasing: false, loading: false };
-        });
-      });
+    // setState((prevState) => {
+    //   return { ...prevState, purchasing: true, loading: true };
+    // });
+    // const order = {
+    //   ingredients: state.ingredients,
+    //   price: state.totalPrice,
+    //   custormer: {
+    //     name: "Max Mad",
+    //     address: {
+    //       street: "Teststreet 1",
+    //       zipCode: "41351",
+    //       country: "Germany",
+    //     },
+    //     email: "test@test.com",
+    //   },
+    //   deliveryMethod: "fastest",
+    // };
+    // axios
+    //   .post("/orders.json", order)
+    //   .then((rsp) => {
+    //     setState((prevState) => {
+    //       return { ...prevState, purchasing: false, loading: false };
+    //     });
+    //   })
+    //   .catch((error) => {
+    //     setState((prevState) => {
+    //       return { ...prevState, purchasing: false, loading: false };
+    //     });
+    //   });
   };
 
-  const orderSummary = (state.ingredients === null || state.loading) ? (
-    <Spinner />
-  ) : (
-    <OrderSummary
-      ingredients={state.ingredients}
-      cancelOrder={removePurchasing}
-      continueOrder={continueOrderHandle}
-      price={state.totalPrice}
-    />
-  );
+  const orderSummary =
+    state.ingredients === null || state.loading ? (
+      <Spinner />
+    ) : (
+      <OrderSummary
+        ingredients={state.ingredients}
+        cancelOrder={removePurchasing}
+        continueOrder={continueOrderHandle}
+        price={state.totalPrice}
+      />
+    );
 
   const burger =
     state.ingredients === null ? (
@@ -160,7 +168,6 @@ const BurgerBuilder = () => {
         />
       </Fragment>
     );
-
 
   return (
     <Fragment>
