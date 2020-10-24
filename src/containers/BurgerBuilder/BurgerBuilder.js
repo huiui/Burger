@@ -24,14 +24,20 @@ const BurgerBuilder = (props) => {
   });
 
   useEffect(() => {
+    let mounted = true;
+
     axios
       .get("https://react-my-burger-6d0c7.firebaseio.com/ingredients.json")
-      .then((response) => {
+      .then((response) => { if (mounted){
         setState((prevState) => {
           return { ...prevState, ingredients: response.data };
-        });
+        });}
       })
       .catch((error) => {});
+
+    return ()=>{
+      mounted = false;
+    }
   }, []);
 
   const updatePurchaseState = (ingredients) => {
@@ -106,38 +112,10 @@ const BurgerBuilder = (props) => {
         encodeURIComponent(i) + "=" + encodeURIComponent(state.ingredients[i])
       );
     }
+    queryParams.push('price=' + state.totalPrice);
     const queryString = queryParams.join("&");
     props.history.push({ pathname: "./checkout", search: "?" + queryString });
-    //alert("Continue!");
-    // setState((prevState) => {
-    //   return { ...prevState, purchasing: true, loading: true };
-    // });
-    // const order = {
-    //   ingredients: state.ingredients,
-    //   price: state.totalPrice,
-    //   custormer: {
-    //     name: "Max Mad",
-    //     address: {
-    //       street: "Teststreet 1",
-    //       zipCode: "41351",
-    //       country: "Germany",
-    //     },
-    //     email: "test@test.com",
-    //   },
-    //   deliveryMethod: "fastest",
-    // };
-    // axios
-    //   .post("/orders.json", order)
-    //   .then((rsp) => {
-    //     setState((prevState) => {
-    //       return { ...prevState, purchasing: false, loading: false };
-    //     });
-    //   })
-    //   .catch((error) => {
-    //     setState((prevState) => {
-    //       return { ...prevState, purchasing: false, loading: false };
-    //     });
-    //   });
+    
   };
 
   const orderSummary =
