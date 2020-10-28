@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import Burger from "../../components/Burger/Burger";
 import BuildControls from "../../components/Burger/BuildControls/BuildControls";
 import Modal from "../../components/UI/Modal/Modal";
@@ -7,31 +7,15 @@ import axios from "../../axios-orders";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import withErrorHandler from "../withErrorHandler/withErrorHandler";
 import { connect } from "react-redux";
-import * as actionTypes from "../../store/actions";
+import * as bugerBuilderAction from "../../store/actions/index";
 
 const BurgerBuilder = (props) => {
   const [state, setState] = useState({
     purchasable: false,
     purchasing: false,
-    loading: false,
   });
 
-  // useEffect(() => {
-  //   let mounted = true;
-
-  //   axios
-  //     .get("https://react-my-burger-6d0c7.firebaseio.com/ingredients.json")
-  //     .then((response) => { if (mounted){
-  //       setState((prevState) => {
-  //         return { ...prevState, ingredients: response.data };
-  //       });}
-  //     })
-  //     .catch((error) => {});
-
-  //   return ()=>{
-  //     mounted = false;
-  //   }
-  // }, []);
+  useEffect(props.initIngredients, []);
 
   const updatePurchaseState = (ingredients) => {
     const sum = Object.keys(ingredients)
@@ -74,7 +58,7 @@ const BurgerBuilder = (props) => {
   };
 
   const orderSummary =
-    props.ings === null || state.loading ? (
+    props.ings === null ? (
       <Spinner />
     ) : (
       <OrderSummary
@@ -85,22 +69,23 @@ const BurgerBuilder = (props) => {
       />
     );
 
-  const burger =
-    props.ings === null ? (
-      <Spinner />
-    ) : (
-      <Fragment>
-        <Burger ingredients={props.ings} />
-        <BuildControls
-          addIngredient={props.onIngredientAdded}
-          removeIngredient={props.onIngredientRemoved}
-          disabledInfo={disabledInfo}
-          purchasable={updatePurchaseState(props.ings)}
-          order={updatePurchasing}
-          price={props.price}
-        />
-      </Fragment>
-    );
+  const burger = props.error ? (
+    <p>Ingredients can't be loaded...</p>
+  ) : props.ings === null ? (
+    <Spinner />
+  ) : (
+    <Fragment>
+      <Burger ingredients={props.ings} />
+      <BuildControls
+        addIngredient={props.onIngredientAdded}
+        removeIngredient={props.onIngredientRemoved}
+        disabledInfo={disabledInfo}
+        purchasable={updatePurchaseState(props.ings)}
+        order={updatePurchasing}
+        price={props.price}
+      />
+    </Fragment>
+  );
 
   return (
     <Fragment>
@@ -116,17 +101,16 @@ const mapStateToProps = (state) => {
   return {
     ings: state.ingredients,
     price: state.totalPrice,
+    error: state.error,
   };
 };
 const mapDispatchToProps = (dispatch) => {
   return {
     onIngredientAdded: (ingName) =>
-      dispatch({ type: actionTypes.ADD_INGREDIENT, ingredientName: ingName }),
+      dispatch(bugerBuilderAction.addIngredient(ingName)),
     onIngredientRemoved: (ingName) =>
-      dispatch({
-        type: actionTypes.REMOVE_INGREDIENT,
-        ingredientName: ingName,
-      }),
+      dispatch(bugerBuilderAction.removeIngredient(ingName)),
+    initIngredients: () => dispatch(bugerBuilderAction.initIngredients()),
   };
 };
 
