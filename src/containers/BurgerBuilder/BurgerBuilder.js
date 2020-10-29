@@ -7,7 +7,7 @@ import axios from "../../axios-orders";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import withErrorHandler from "../withErrorHandler/withErrorHandler";
 import { connect } from "react-redux";
-import * as bugerBuilderAction from "../../store/actions/index";
+import * as burgerBuilderAction from "../../store/actions/index";
 
 const BurgerBuilder = (props) => {
   const [state, setState] = useState({
@@ -46,15 +46,8 @@ const BurgerBuilder = (props) => {
   };
 
   const continueOrderHandle = () => {
-    const queryParams = [];
-    for (let i in props.ings) {
-      queryParams.push(
-        encodeURIComponent(i) + "=" + encodeURIComponent(props.ings[i])
-      );
-    }
-    queryParams.push("price=" + props.price);
-    const queryString = queryParams.join("&");
-    props.history.push({ pathname: "./checkout", search: "?" + queryString });
+    props.initPurchase();
+    props.history.push("./checkout");
   };
 
   const orderSummary =
@@ -99,18 +92,19 @@ const BurgerBuilder = (props) => {
 
 const mapStateToProps = (state) => {
   return {
-    ings: state.ingredients,
-    price: state.totalPrice,
-    error: state.error,
+    ings: state.burgerBuilder.ingredients,
+    price: state.burgerBuilder.totalPrice,
+    error: state.burgerBuilder.error,
   };
 };
 const mapDispatchToProps = (dispatch) => {
   return {
     onIngredientAdded: (ingName) =>
-      dispatch(bugerBuilderAction.addIngredient(ingName)),
+      dispatch(burgerBuilderAction.addIngredient(ingName)),
     onIngredientRemoved: (ingName) =>
-      dispatch(bugerBuilderAction.removeIngredient(ingName)),
-    initIngredients: () => dispatch(bugerBuilderAction.initIngredients()),
+      dispatch(burgerBuilderAction.removeIngredient(ingName)),
+    initIngredients: () => dispatch(burgerBuilderAction.initIngredients()),
+    initPurchase: () => dispatch(burgerBuilderAction.purchaseInit()),
   };
 };
 
