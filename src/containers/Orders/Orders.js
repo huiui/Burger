@@ -7,7 +7,7 @@ import * as actions from "../../store/actions/index";
 import Spinner from "../../components/UI/Spinner/Spinner";
 
 const Orders = (props) => {
-  useEffect(props.onFetchOrders, []);
+  useEffect(()=>props.onFetchOrders(), []);
   let orders = <Spinner/>;
   if (!props.loading){
     orders = props.currentOrders.map((order) => (
