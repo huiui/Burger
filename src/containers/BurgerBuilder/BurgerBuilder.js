@@ -7,7 +7,7 @@ import axios from "../../axios-orders";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import withErrorHandler from "../withErrorHandler/withErrorHandler";
 import { connect } from "react-redux";
-import * as burgerBuilderAction from "../../store/actions/index";
+import * as actions from "../../store/actions/index";
 
 const BurgerBuilder = (props) => {
   const [state, setState] = useState({
@@ -34,9 +34,14 @@ const BurgerBuilder = (props) => {
   }
 
   const updatePurchasing = () => {
-    setState((prevState) => {
-      return { ...prevState, purchasing: true };
-    });
+    if (props.isAuth) {
+      setState((prevState) => {
+        return { ...prevState, purchasing: true };
+      });
+    } else {
+      props.onSetAuthRedirectPath("/checkout");
+      props.history.push("/Auth");
+    }
   };
 
   const removePurchasing = () => {
@@ -76,6 +81,7 @@ const BurgerBuilder = (props) => {
         purchasable={updatePurchaseState(props.ings)}
         order={updatePurchasing}
         price={props.price}
+        isAuth={props.isAuth}
       />
     </Fragment>
   );
@@ -95,16 +101,18 @@ const mapStateToProps = (state) => {
     ings: state.burgerBuilder.ingredients,
     price: state.burgerBuilder.totalPrice,
     error: state.burgerBuilder.error,
+    isAuth: state.auth.token !== null,
   };
 };
 const mapDispatchToProps = (dispatch) => {
   return {
-    onIngredientAdded: (ingName) =>
-      dispatch(burgerBuilderAction.addIngredient(ingName)),
+    onIngredientAdded: (ingName) => dispatch(actions.addIngredient(ingName)),
     onIngredientRemoved: (ingName) =>
-      dispatch(burgerBuilderAction.removeIngredient(ingName)),
-    initIngredients: () => dispatch(burgerBuilderAction.initIngredients()),
-    initPurchase: () => dispatch(burgerBuilderAction.purchaseInit()),
+      dispatch(actions.removeIngredient(ingName)),
+    initIngredients: () => dispatch(actions.initIngredients()),
+    initPurchase: () => dispatch(actions.purchaseInit()),
+    onSetAuthRedirectPath: (path) =>
+      dispatch(actions.setAuthRedirectionPath(path)),
   };
 };
 

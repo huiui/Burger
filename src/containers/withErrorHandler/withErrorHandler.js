@@ -7,25 +7,29 @@ const withErrorHandler = (WrappedComponent, axios) => {
 
     useEffect(() => {
       axios.interceptors.request.use((req) => {
-        setState({ error: null });
+        //setState({ error: null });
         return req;
       });
       axios.interceptors.response.use(
-        (res) => res,
+        (res) => {return res},
         (error) => {
-          setState({ error: error });
+          //console.log(error.response);
+          error = error.response.data; 
+          //setState((prevState)=>{console.log("set state trigued"); return {...prevState, error: "error.response.data"} });
         }
       );
-    });
+    }, []);
 
     const errorConfirmedHandler = () => {
       setState({ error: null });
     };
 
+    //console.log(state);
+
     return (
       <Fragment>
         <Modal show={state.error} cancelModal={errorConfirmedHandler}>
-          {state.error ? state.error.message : null}
+          {state.error ? state.error : null}
         </Modal>
         <WrappedComponent {...props} />
       </Fragment>

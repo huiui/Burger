@@ -7,7 +7,7 @@ import * as actions from "../../store/actions/index";
 import Spinner from "../../components/UI/Spinner/Spinner";
 
 const Orders = (props) => {
-  useEffect(()=>props.onFetchOrders(), []);
+  useEffect(()=>props.onFetchOrders(props.token, props.userId), []);
   let orders = <Spinner/>;
   if (!props.loading){
     orders = props.currentOrders.map((order) => (
@@ -27,7 +27,7 @@ const Orders = (props) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    onFetchOrders: ()=> dispatch(actions.fetchOrders())
+    onFetchOrders: (token, userId)=> dispatch(actions.fetchOrders(token, userId))
   }
 }
 
@@ -35,6 +35,8 @@ const mapStateToProps = state => {
   return {
     currentOrders: state.order.orders,
     loading: state.order.loading,
+    token: state.auth.token,
+    userId: state.auth.userId,
   }
 }
 

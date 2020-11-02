@@ -103,9 +103,10 @@ const ContactData = (props) => {
       ingredients: props.ings,
       price: props.price,
       orderData: formData,
+      userId: props.userId,
     };
 
-    props.purchaseBurgerStart(order);
+    props.purchaseBurgerStart(order, props.token);
 
   };
 
@@ -190,13 +191,15 @@ const mapStateToProps = state => {
   return {
     ings: state.burgerBuilder.ingredients,
     price: state.burgerBuilder.totalPrice,
-    loading: state.order.loading
+    loading: state.order.loading,
+    token: state.auth.token,
+    userId: state.auth.userId,
   }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        purchaseBurgerStart: (orderData) => {dispatch(actions.purchaseBurger(orderData))}
+        purchaseBurgerStart: (orderData, token) => {dispatch(actions.purchaseBurger(orderData, token))}
     }
 };
 export default connect(mapStateToProps, mapDispatchToProps)(withErrorhandler(ContactData, axios));

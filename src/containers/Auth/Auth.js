@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
+import { Redirect } from "react-router-dom";
 import Input from "../../components/UI/Input/Input";
 import Button from "../../components/UI/Button/Button";
 import styles from "./Auth.module.css";
@@ -40,6 +41,12 @@ const Auth = (props) => {
     },
     isSignUp: true,
   });
+
+  useEffect(() => {
+    if (!props.buildingBurger && props.authRedirectPath !== null) {
+      props.onSetAuthRedirectPath();
+    }
+  }, []);
 
   const formElementsArray = [];
   for (let key in state.controls) {
@@ -107,8 +114,8 @@ const Auth = (props) => {
   }
 
   let errorMessage = null;
-  if(props.error) {
-  errorMessage = <p>{props.error.message}</p>
+  if (props.error) {
+    errorMessage = <p>{props.error.message}</p>;
   }
 
   const submitHandler = (event) => {
@@ -128,6 +135,7 @@ const Auth = (props) => {
 
   return (
     <div className={styles.Auth}>
+      {props.isAuth && <Redirect to={props.authRedirectPath} />}
       <form onSubmit={submitHandler}>
         {errorMessage}
         {form}
@@ -144,6 +152,9 @@ const mapStateToProps = (state) => {
   return {
     loading: state.auth.loading,
     error: state.auth.error,
+    isAuth: state.auth.token !== null,
+    buildingBurger: state.burgerBuilder.building,
+    authRedirectPath: state.auth.authRedirectPath,
   };
 };
 
@@ -151,6 +162,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     onAuth: (email, password, isSignUp) =>
       dispatch(actions.auth(email, password, isSignUp)),
+    onSetAuthRedirectPath: () => dispatch(actions.setAuthRedirectionPath("/")),
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Auth);
