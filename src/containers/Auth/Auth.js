@@ -42,11 +42,13 @@ const Auth = (props) => {
     isSignUp: true,
   });
 
+  const { buildingBurger, authRedirectPath, onSetAuthRedirectPath } = props;
+
   useEffect(() => {
-    if (!props.buildingBurger && props.authRedirectPath !== null) {
-      props.onSetAuthRedirectPath();
+    if (!buildingBurger && authRedirectPath !== null) {
+      onSetAuthRedirectPath();
     }
-  }, []);
+  }, [buildingBurger, authRedirectPath, onSetAuthRedirectPath]);
 
   const formElementsArray = [];
   for (let key in state.controls) {

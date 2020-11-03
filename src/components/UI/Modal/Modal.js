@@ -3,7 +3,6 @@ import styles from "./Modal.module.css";
 import Backdrop from "../Backdrop/Backdrop";
 
 const Modal = (props) => {
-
   return (
     <Fragment>
       <Backdrop show={props.show} handleClick={props.cancelModal} />
@@ -20,4 +19,9 @@ const Modal = (props) => {
   );
 };
 
-export default Modal;
+export default React.memo(
+  Modal,
+  (prevProps, nextProps) =>
+    nextProps.show === prevProps.show &&
+    nextProps.children === prevProps.children
+);
